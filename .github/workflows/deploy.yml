@@ -1,0 +1,32 @@
+name: Deploy aziral-video-gen
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          DEPLOY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          envs: DEPLOY_TOKEN
+          script: |
+            cd /var/www/aziral-video-gen
+            git remote set-url origin https://x-access-token:${DEPLOY_TOKEN}@github.com/shutovBro/aziral-video-gen.git
+            git fetch origin main
+            git reset --hard origin/main
+            docker compose up -d --build
+            docker ps
