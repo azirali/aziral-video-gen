@@ -5,9 +5,23 @@ services:
       dockerfile: Dockerfile
     container_name: aziral-video-gen
     restart: always
+    environment:
+      # Must match the domain nginx serves, otherwise Streamlit's CORS check
+      # rejects the browser's websocket connection and the UI never loads.
+      STREAMLIT_BROWSER_SERVER_ADDRESS: video.aziral.shop
     volumes:
       - ./config.toml:/MoneyPrinterTurbo/config.toml
       - ./storage:/MoneyPrinterTurbo/storage
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request;urllib.request.urlopen('http://127.0.0.1:8501/_stcore/health',timeout=5)
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
     networks:
       - fenix-global-network
 

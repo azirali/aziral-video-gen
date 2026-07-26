@@ -52,4 +52,6 @@ COPY . .
 EXPOSE 8501
 
 # Command to run the application
-CMD ["streamlit", "run", "./webui/Main.py","--browser.serverAddress=127.0.0.1","--server.enableCORS=True","--browser.gatherUsageStats=False"]
+# browser.serverAddress is intentionally not set here: behind a reverse proxy it
+# must match the public domain, so it is supplied via STREAMLIT_BROWSER_SERVER_ADDRESS.
+CMD ["streamlit", "run", "./webui/Main.py","--server.address=0.0.0.0","--server.port=8501","--server.headless=true","--browser.gatherUsageStats=False"]

@@ -10,8 +10,20 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Check deploy secrets
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          missing=""
+          [ -n "$SSH_HOST" ] || missing="$missing SSH_HOST"
+          [ -n "$SSH_USER" ] || missing="$missing SSH_USER"
+          [ -n "$SSH_PRIVATE_KEY" ] || missing="$missing SSH_PRIVATE_KEY"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repository secrets:$missing (Settings -> Secrets and variables -> Actions)"
+            exit 1
+          fi
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -23,10 +35,42 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           envs: DEPLOY_TOKEN
+          script_stop: true
           script: |
             cd /var/www/aziral-video-gen
             git remote set-url origin https://x-access-token:${DEPLOY_TOKEN}@github.com/shutovBro/aziral-video-gen.git
             git fetch origin main
             git reset --hard origin/main
+
+            # config.toml is bind-mounted; without this Docker creates a directory
+            # in its place and the app fails to start.
+            if [ ! -f config.toml ]; then
+              cp config.example.toml config.toml
+            fi
+            mkdir -p storage
+
             docker compose up -d --build
-            docker ps
+            docker compose ps
+
+      - name: Verify site is up
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script_stop: true
+          script: |
+            cd /var/www/aziral-video-gen
+            for i in $(seq 1 30); do
+              if docker compose exec -T aziral-video-gen \
+                  python -c "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8501/_stcore/health',timeout=5)" \
+                  >/dev/null 2>&1; then
+                echo "aziral-video-gen is healthy"
+                exit 0
+              fi
+              sleep 5
+            done
+            echo "::error::aziral-video-gen did not become healthy in 150s"
+            docker compose logs --tail 100 aziral-video-gen
+            exit 1
