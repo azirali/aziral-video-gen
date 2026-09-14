@@ -1,0 +1,50 @@
+name: Deploy to Hugging Face Space
+
+# Mirrors the repository into a Docker Space and lets Hugging Face build it.
+#
+# One-time setup:
+#   1. Create a Space: https://huggingface.co/new-space → SDK "Docker" → "Blank".
+#   2. Repository variable HF_SPACE = <hf-user>/<space-name>
+#      (Settings → Secrets and variables → Actions → Variables).
+#   3. Repository secret HF_TOKEN = a Hugging Face token with "write" access.
+#   4. In the Space settings add the secrets from deploy/huggingface/bootstrap_config.py
+#      (at least PEXELS_API_KEYS; LLM defaults to the keyless pollinations provider).
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  push-to-space:
+    if: ${{ vars.HF_SPACE != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Assemble Space tree
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/space && mkdir /tmp/space
+          git archive HEAD | tar -x -C /tmp/space
+          cp deploy/huggingface/Dockerfile /tmp/space/Dockerfile
+          cp deploy/huggingface/README.md /tmp/space/README.md
+          # Spaces reject files >10 MB outside LFS; the demo does not need these
+          rm -rf /tmp/space/docs /tmp/space/test /tmp/space/uv.lock
+          find /tmp/space -type f -size +10M -print -delete
+
+      - name: Push to Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_SPACE: ${{ vars.HF_SPACE }}
+        run: |
+          set -euo pipefail
+          cd /tmp/space
+          git init -q -b main
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Deploy ${GITHUB_SHA::7} from ${GITHUB_REPOSITORY}"
+          git push -f "https://user:${HF_TOKEN}@huggingface.co/spaces/${HF_SPACE}" main

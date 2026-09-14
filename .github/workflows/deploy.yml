@@ -1,4 +1,8 @@
-name: Deploy aziral-video-gen
+name: Deploy to own server (SSH)
+
+# Legacy self-hosted deploy. Runs only when the SSH_* secrets are configured
+# (repository variable SSH_DEPLOY_ENABLED=true), otherwise it is skipped
+# instead of failing every push.
 
 on:
   push:
@@ -8,6 +12,7 @@ on:
 
 jobs:
   deploy:
+    if: ${{ vars.SSH_DEPLOY_ENABLED == 'true' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
