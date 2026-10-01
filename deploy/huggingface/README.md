@@ -15,7 +15,7 @@ short_description: AI marketing video generator — script, footage, voice-over,
 Type a topic → get a finished short video (script, stock footage, TTS voice-over,
 subtitles, background music).
 
-Source and documentation: https://github.com/shutovBro/aziral-video-gen
+Source and documentation: https://github.com/azirali/aziral-video-gen
 
 This Space is rebuilt automatically from the `main` branch by
 `.github/workflows/deploy-hf.yml`. Configure API keys as Space secrets

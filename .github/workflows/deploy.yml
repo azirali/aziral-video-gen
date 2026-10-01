@@ -30,7 +30,7 @@ jobs:
           envs: DEPLOY_TOKEN
           script: |
             cd /var/www/aziral-video-gen
-            git remote set-url origin https://x-access-token:${DEPLOY_TOKEN}@github.com/shutovBro/aziral-video-gen.git
+            git remote set-url origin https://x-access-token:${DEPLOY_TOKEN}@github.com/azirali/aziral-video-gen.git
             git fetch origin main
             git reset --hard origin/main
             docker compose up -d --build

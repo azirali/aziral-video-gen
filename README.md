@@ -1,8 +1,8 @@
 # AZIRAL Video Generator 🎬
 
 <p align="center">
-  <a href="https://github.com/shutovBro/aziral-video-gen/actions/workflows/ci.yml"><img src="https://github.com/shutovBro/aziral-video-gen/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"></a>
-  <a href="https://github.com/shutovBro/aziral-video-gen/actions/workflows/deploy-hf.yml"><img src="https://github.com/shutovBro/aziral-video-gen/actions/workflows/deploy-hf.yml/badge.svg?branch=main" alt="Deploy"></a>
+  <a href="https://github.com/azirali/aziral-video-gen/actions/workflows/ci.yml"><img src="https://github.com/azirali/aziral-video-gen/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"></a>
+  <a href="https://github.com/azirali/aziral-video-gen/actions/workflows/deploy-hf.yml"><img src="https://github.com/azirali/aziral-video-gen/actions/workflows/deploy-hf.yml/badge.svg?branch=main" alt="Deploy"></a>
   <img src="https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white" alt="Python 3.11">
   <img src="https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white" alt="FastAPI">
   <img src="https://img.shields.io/badge/Streamlit-FF4B4B?logo=streamlit&logoColor=white" alt="Streamlit">
